@@ -1,0 +1,33 @@
+{
+  "name": "nemo-ui",
+  "version": "0.0.1",
+  "description": "UI for Nemo View creation",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grawk/nemo-ui"
+  },
+  "keywords": [
+    "Nemo",
+    "Selenium",
+    "Webdriver"
+  ],
+  "author": "@grawk",
+  "license": "Apache 2",
+  "bugs": {
+    "url": "https://github.com/grawk/nemo-ui/issues"
+  },
+  "bin": {
+    "nemo-ui": "./bin/nemo-ui.js"
+  },
+  "dependencies": {
+    "commander": "^2.6.0",
+    "express": "^4.11.2",
+    "glob": "^4.3.5",
+    "nemo": "^0.3.0"
+  },
+  "homepage": "https://github.com/grawk/nemo-ui"
+}

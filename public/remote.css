@@ -1,0 +1,17 @@
+#nemoUI {
+    background-color:yellow;
+    position:absolute;
+    min-width:400px;
+    min-height:400px;
+    top:0;
+    right:0;
+}
+
+#nemoUI table td {
+    border:1px solid #ccc;
+    padding:3px;
+}
+#nemoUI div.uimsg {
+    color:blue;
+
+}
