@@ -13,5 +13,10 @@
 }
 #nemoUI div.uimsg {
     color:blue;
+}
 
+#nemoUI p input[type=text] {
+    float:right;
+    width: 250px;
+    margin-right:50px;
 }

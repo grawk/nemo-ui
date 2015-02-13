@@ -3,7 +3,11 @@ var app = express();
 var path = require('path');
 var nemoRemote = require(path.resolve(__dirname, '../nemo-remote'));
 var glob = require('glob');
+var fs = require('fs');
+var tmpView = null;
 var suitePath = null;
+var bodyParser = require('body-parser')
+
 var options = {
   dotfiles: 'ignore',
   etag: false,
@@ -22,20 +26,41 @@ app.use(function (req, res, next) {
   console.log('handling request', req.path);
   return next();
 });
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
 app.get('/', function (req, res) {
   res.send('Hello World!')
 });
 app.get('/views', function (req, res) {
   console.log('locator path', suitePath + "/locator/*");
   //read JSON files in directory
-  glob(suitePath + "/locator/*", function (er, files) {
-    files.forEach(function(file, index, arr) {
-      arr[index] = file.split(suitePath + "/locator/")[1].split(".json")[0];
-    });
-    console.log('views are', files);
+  getViews(function(files) {
     res.json({
+      "uiView": "viewList",
       "views": files
     });
+  });
+
+});
+
+app.get('/views/new', function (req, res) {
+  //new view
+  res.json({
+    'uiView': 'viewEdit',
+    'mode': 'new'
+  });
+});
+
+app.post('/views/new', function (req, res) {
+  //new view
+  //get view name off of request
+  var viewName = req.body.name;
+  //save new JSON file
+  res.json({
+    'uiView': 'viewEdit',
+    'viewName': viewName
   });
 });
 
@@ -43,19 +68,96 @@ app.get('/view/:name', function (req, res) {
   var viewName = req.params.name;
   var view = require(suitePath+'/locator/'+viewName+'.json');
   res.json({
+    'uiView': 'viewEdit',
     'viewName': viewName,
     'viewJSON': view
+  });
+});
+
+
+app.get('/view/:name/delete', function (req, res) {
+  var viewName = req.params.name;
+  var view = require(suitePath+'/locator/'+viewName+'.json');
+  getViews(function(files) {
+    res.json({
+      'uiMsg': 'Deleted View ' + viewName,
+      'uiView': 'viewList',
+      'views': files
+    });
   });
 });
 
 app.get('/view/:name/:locator/edit', function (req, res) {
   var viewName = req.params.name;
   var locatorName = req.params.locator;
+  var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  var viewJson = {};
+  viewJson[locatorName] = locatorJson;
+  //tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
+  //viewMethods = [];
+  //Object.keys(tmpView).forEach(function(val, ind, arr) {
+  //  console.log('val', val, 'constructor', val.constructor);
+  //  if (val.indexOf(locatorName) === 0) {
+  //    console.log('push');
+  //    viewMethods.push(val);
+  //  }
+  //});
+    res.json({
+      'uiView': 'locatorEdit',
+      'viewName': viewName,
+      'locatorName': locatorName,
+      'locatorJson': locatorJson,
+      'locatorType': locatorJson.type,
+      'locatorString': locatorJson.locator
+    });
+});
+
+app.post('/view/:name/:locator/edit', function (req, res) {
+  var viewName = req.params.name;
+  var locatorName = req.params.locator;
+  var locatorType = req.body.type;
+  var locatorString = req.body.string;
+  var view = require(suitePath+'/locator/'+viewName+'.json');
+
+  //var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  //var viewJson = {};
+  //viewJson[locatorName] = locatorJson;
+  //tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
+  //viewMethods = [];
+  //Object.keys(tmpView).forEach(function(val, ind, arr) {
+  //  console.log('val', val, 'constructor', val.constructor);
+  //  if (val.indexOf(locatorName) === 0) {
+  //    console.log('push');
+  //    viewMethods.push(val);
+  //  }
+  //});
+  res.json({
+    'uiView': 'viewEdit',
+    'viewName': viewName,
+    'uiMsg': 'Saved Locator ' + locatorName,
+    'viewJSON': view
+  });
+});
+app.get('/view/:name/locator/new', function (req, res) {
+  var viewName = req.params.name;
+  res.json({
+    'uiView': 'locatorEdit',
+    'mode': 'new',
+    'viewName': viewName
+  });
+});
+
+app.post('/view/:name/locator/new', function (req, res) {
+  var viewName = req.params.name;
+  var locatorName = req.body.name;
+  var locatorType = req.body.type;
+  var locatorString = req.body.string;
   var view = require(suitePath+'/locator/'+viewName+'.json');
   res.json({
+    'uiMsg': 'Added Locator ' + locatorName,
+    'uiView': 'viewEdit',
     'viewName': viewName,
-    'locatorName': locatorName,
-    'locatorJSON': view.locatorName
+    'viewJSON': view
   });
 });
 
@@ -64,12 +166,34 @@ app.get('/view/:name/:locator/delete', function (req, res) {
   var locatorName = req.params.locator;
   var view = require(suitePath+'/locator/'+viewName+'.json');
   res.json({
-    'uimsg': 'Deleted Locator ' + locatorName,
+    'uiMsg': 'Deleted Locator ' + locatorName,
+    'uiView': 'viewEdit',
     'viewName': viewName,
     'viewJSON': view
   });
 });
 
+app.get('/view/:name/:locator/test', function (req, res) {
+  var viewName = req.params.name;
+  var locatorName = req.params.locator;
+  var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  var viewJson = {};
+  viewJson[locatorName] = locatorJson;
+  tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
+  tmpView[locatorName]().getOuterHtml().then(function(outerHtml) {
+    res.json({
+      'uiView': 'locatorTest',
+      'viewName': viewName,
+      'html': outerHtml
+    });
+  }, function(err) {
+    console.log('err from webdriver', err);
+    res.json({
+      'uiView': 'error',
+      'uiMsg': 'error code :'  + err.code
+    })
+  });
+});
 app.get('/reinject', function (req, res) {
   nemoRemote.reinjectUI().then(function () {
     res.send('OK');
@@ -86,3 +210,13 @@ module.exports = function (_suitePath) {
 
   });
 };
+
+function getViews(cb) {
+  glob(suitePath + "/locator/*", function (er, files) {
+    files.forEach(function(file, index, arr) {
+      arr[index] = file.split(suitePath + "/locator/")[1].split(".json")[0];
+    });
+    console.log('views are', files);
+    cb(files);
+  });
+}

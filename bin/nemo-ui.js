@@ -22,6 +22,19 @@ console.log('suitePath', suitePath);
 console.log('url %s, browser %s', program.url, program.browser);
 //launch browser
 var config = {
+  plugins: {
+    "drivex": {
+      "module": "nemo-drivex",
+      "register": true
+    },
+    "locatex": {
+      "module": "nemo-locatex",
+      "register": true
+    },
+    "view": {
+      "module": "nemo-view"
+    }
+  },
   nemoData: {
     targetBrowser: browser || "chrome",
     targetServer: "localhost",
@@ -38,23 +51,3 @@ nemoRemote.start(config).then(function() {
 
   nemoRemote.injectUI();
 });
-
-
-//
-//function checkUI() {
-//  nemo.driver.executeScript(function() {
-//    var present = document.querySelector("#nemo-ui-script");
-//    if (present === null) {
-//      return false;
-//    } else {
-//      return true;
-//    }
-//  }).then(function(returned) {
-//    if (returned === false) {
-//      console.log('reinject NemoUI');
-//      injectUI();
-//    }
-//  }, function(err) {
-//    console.log('checkUI error', err);
-//  })
-//}
