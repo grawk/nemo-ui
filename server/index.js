@@ -6,7 +6,7 @@ var glob = require('glob');
 var fs = require('fs');
 var tmpView = null;
 var suitePath = null;
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 
 var options = {
   dotfiles: 'ignore',
@@ -58,10 +58,16 @@ app.post('/views/new', function (req, res) {
   //get view name off of request
   var viewName = req.body.name;
   //save new JSON file
-  res.json({
-    'uiView': 'viewEdit',
-    'viewName': viewName
+  fs.writeFile(suitePath+'/locator/'+viewName+'.json', '{}', function (err) {
+    if (err) throw err;
+    console.log('Saved ' + viewName + '.json');
+    res.json({
+      'uiView': 'viewEdit',
+      'uiMsg': 'Added View ' + viewName,
+      'viewName': viewName
+    });
   });
+
 });
 
 app.get('/view/:name', function (req, res) {
@@ -77,12 +83,16 @@ app.get('/view/:name', function (req, res) {
 
 app.get('/view/:name/delete', function (req, res) {
   var viewName = req.params.name;
-  var view = require(suitePath+'/locator/'+viewName+'.json');
-  getViews(function(files) {
-    res.json({
-      'uiMsg': 'Deleted View ' + viewName,
-      'uiView': 'viewList',
-      'views': files
+  fs.unlink(suitePath+'/locator/'+viewName+'.json', function(err) {
+    if (err) {
+      throw err;
+    }
+    getViews(function(files) {
+      res.json({
+        'uiMsg': 'Deleted View ' + viewName,
+        'uiView': 'viewList',
+        'views': files
+      });
     });
   });
 });
@@ -117,26 +127,22 @@ app.post('/view/:name/:locator/edit', function (req, res) {
   var locatorName = req.params.locator;
   var locatorType = req.body.type;
   var locatorString = req.body.string;
-  var view = require(suitePath+'/locator/'+viewName+'.json');
-
-  //var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
-  //var viewJson = {};
-  //viewJson[locatorName] = locatorJson;
-  //tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
-  //viewMethods = [];
-  //Object.keys(tmpView).forEach(function(val, ind, arr) {
-  //  console.log('val', val, 'constructor', val.constructor);
-  //  if (val.indexOf(locatorName) === 0) {
-  //    console.log('push');
-  //    viewMethods.push(val);
-  //  }
-  //});
-  res.json({
-    'uiView': 'viewEdit',
-    'viewName': viewName,
-    'uiMsg': 'Saved Locator ' + locatorName,
-    'viewJSON': view
+  var viewJson = require(suitePath+'/locator/'+viewName+'.json');
+  viewJson[locatorName] = {
+    'type': locatorType,
+    'locator': locatorString
+  };
+  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.toString(viewJson), function (err) {
+    if (err) throw err;
+    console.log('Saved ' + viewName + '.json');
+    res.json({
+      'uiView': 'viewEdit',
+      'viewName': viewName,
+      'uiMsg': 'Saved Locator ' + locatorName,
+      'viewJSON': viewJson
+    });
   });
+
 });
 app.get('/view/:name/locator/new', function (req, res) {
   var viewName = req.params.name;
@@ -152,13 +158,22 @@ app.post('/view/:name/locator/new', function (req, res) {
   var locatorName = req.body.name;
   var locatorType = req.body.type;
   var locatorString = req.body.string;
-  var view = require(suitePath+'/locator/'+viewName+'.json');
-  res.json({
-    'uiMsg': 'Added Locator ' + locatorName,
-    'uiView': 'viewEdit',
-    'viewName': viewName,
-    'viewJSON': view
+  var viewJson = require(suitePath+'/locator/'+viewName+'.json');
+  viewJson[locatorName] = {
+    'type': locatorType,
+    'locator': locatorString
+  };
+  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.toString(viewJson), function (err) {
+    if (err) throw err;
+    console.log('Saved ' + viewName + '.json');
+    res.json({
+      'uiMsg': 'Added Locator ' + locatorName,
+      'uiView': 'viewEdit',
+      'viewName': viewName,
+      'viewJSON': viewJson
+    });
   });
+
 });
 
 app.get('/view/:name/:locator/delete', function (req, res) {
@@ -173,10 +188,19 @@ app.get('/view/:name/:locator/delete', function (req, res) {
   });
 });
 
-app.get('/view/:name/:locator/test', function (req, res) {
+app.all('/view/:name/:locator/test', function (req, res) {
   var viewName = req.params.name;
   var locatorName = req.params.locator;
-  var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  var locatorJson = {};
+  if (req.body && req.body.type) {
+    locatorJson = {
+      'type': req.body.type,
+      'locator': req.body.string
+    }
+  } else {
+    locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  }
+
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
   tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
@@ -190,7 +214,7 @@ app.get('/view/:name/:locator/test', function (req, res) {
     console.log('err from webdriver', err);
     res.json({
       'uiView': 'error',
-      'uiMsg': 'error code :'  + err.code
+      'uiMsg': 'error message:'  + err.message
     })
   });
 });

@@ -12,13 +12,18 @@
   };
   views.viewList = function (json) {
     var views = json.views;
-    var markup = '<h3>Views <input type="button" value="New" data-method="get" id="nemoUI_newView"/></h3>' +
+    var markup = '<h3>Views</h3>' +
       getUIMessage(json) +
-      '<ul>';
+      '<table>' +
+      '<tr>' +
+      '<th>Name</th>' +
+      '<th>Actions</th>' +
+      '</tr>';
     views.forEach(function (view) {
-      markup += '<li><a href="' + baseurl + '/view/' + view + '">' + view + '</a></li>';
+      markup += '<tr><td>'+view+'</td><td><a href="' + baseurl + '/view/' + view + '">Edit</a> | <a href="' + baseurl + '/view/' + view + '/delete">Delete</a></td></tr>';
     });
-    markup += '</ul>';
+    markup += '</table>' +
+      '<p><input type="button" value="New View" data-method="get" id="nemoUI_newView"/></p>'
 
     return markup;
 
@@ -29,9 +34,9 @@
     var viewJSON = json.viewJSON || {};
     var markup = '';
     if (json.mode && json.mode === 'new') {
-      markup += '<h3><a href="' + baseurl + '/views">Views</a> > <input type="text" value="" id="nemoUI_newName"/><input type="button" value="Save" id="nemoUI_saveNewView"/></h3>';
+      markup += '<h3><a href="' + baseurl + '/views">Views</a> > <input type="text" value="" id="nemoUI_newName"/></h3>';
     } else {
-      markup += '<h3><a href="' + baseurl + '/views">Views</a> > ' + viewName + ' <input type="button" value="Delete" id="nemoUI_viewDelete"/></h3>';
+      markup += '<h3><a href="' + baseurl + '/views">Views</a> > ' + viewName + '</h3>';
     }
 
     markup += getUIMessage(json) +
@@ -50,10 +55,12 @@
       '<td><a  href="' + baseurl + '/view/' + viewName + '/' + key + '/edit">Edit</a> | <a href="' + baseurl + '/view/' + viewName + '/' + key + '/delete">Delete</a>| <a href="' + baseurl + '/view/' + viewName + '/' + key + '/test">Test</a></td>' +
       '</tr>';
     });
-    markup += '</table>' +
-    '<p><input type="button" data-viewname="'+ viewName +'" data-method="GET" value="New Locator" id="nemoUI_locatorNew"/></p>';
-
-
+    markup += '</table>';
+    if (json.mode && json.mode === 'new') {
+      markup += '<input type="button" value="Save" id="nemoUI_saveNewView"/>';
+    } else {
+      markup += '<p><input type="button" data-viewname="'+ viewName +'" data-method="GET" value="New Locator" id="nemoUI_locatorNew"/></p>';
+    }
     return markup;
   };
 
@@ -94,7 +101,20 @@
   };
   views.error = {
     'render': function(json) {
-      alert(json.uiMsg);
+      var errorbox = document.querySelector("#nemoUI .error");
+      if (errorbox && errorbox.remove) {
+        errorbox.remove();
+      }
+      errorbox = document.createElement("p");
+      errorbox.setAttribute("class", "error");
+      errorbox.innerText = json.uiMsg;
+      document.querySelector("#nemoUI").insertBefore(errorbox, document.querySelector("#nemoUI h3").nextSibling);
+    },
+    'teardown': function() {
+      var errorbox = document.querySelector("#nemoUI .error");
+      if (errorbox && errorbox.remove) {
+        errorbox.remove();
+      }
     }
   };
   function getUIMessage(json) {
@@ -144,7 +164,8 @@
       url += '/views/new';
       method = 'POST';
       data = 'name=' + document.querySelector('#nemoUI_newName').value;
-    } else if (buttonId === 'nemoUI_locatorSave') {
+    }
+    else if (buttonId === 'nemoUI_locatorSave') {
       var locatorName = e.srcElement.getAttribute('data-locatorname');
       var viewName = e.srcElement.getAttribute('data-viewname');
       var type = document.querySelector('#nemoUI_locatorType').value;
@@ -163,6 +184,13 @@
 
       method = 'POST';
 
+    }
+    else if (buttonId === 'nemoUI_locatorTest') {
+      var type = document.querySelector('#nemoUI_locatorType').value;
+      var string = document.querySelector('#nemoUI_locatorString').value;
+      var viewName = e.srcElement.getAttribute('data-viewname') || 'foo';
+      url += '/view/' + viewName + '/bar/test';
+      data = 'type=' + type + '&string=' + string;
     } else {
       return; //don't submit
     }
@@ -175,6 +203,8 @@
   }
 
   function xhr(config) {
+    //kill any error messages
+    views.error.teardown();
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("progress", config.progress || xhrProgress, false);
     oReq.addEventListener("load", config.load || xhrLoad, false);
