@@ -48,6 +48,5 @@ serv(suitePath);
 
 //start Nemo
 nemoRemote.start(config).then(function() {
-
   nemoRemote.injectUI();
 });

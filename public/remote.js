@@ -20,10 +20,10 @@
       '<th>Actions</th>' +
       '</tr>';
     views.forEach(function (view) {
-      markup += '<tr><td>'+view+'</td><td><a href="' + baseurl + '/view/' + view + '">Edit</a> | <a href="' + baseurl + '/view/' + view + '/delete">Delete</a></td></tr>';
+      markup += '<tr><td>' + view + '</td><td><a href="' + baseurl + '/view/' + view + '">Edit</a> | <a href="' + baseurl + '/view/' + view + '/delete">Delete</a></td></tr>';
     });
     markup += '</table>' +
-      '<p><input type="button" value="New View" data-method="get" id="nemoUI_newView"/></p>'
+    '<p><input type="button" value="New View" data-method="get" id="nemoUI_newView"/></p>'
 
     return markup;
 
@@ -40,13 +40,13 @@
     }
 
     markup += getUIMessage(json) +
-      '<table>' +
-      '<tr>' +
-      '<th>Name</th>' +
-      '<th>Type</th>' +
-      '<th>Locator</th>' +
-      '<th>Actions</th>' +
-      '</tr>';
+    '<table>' +
+    '<tr>' +
+    '<th>Name</th>' +
+    '<th>Type</th>' +
+    '<th>Locator</th>' +
+    '<th>Actions</th>' +
+    '</tr>';
     Object.keys(viewJSON).forEach(function (key) {
       markup += '<tr>' +
       '<td>' + key + '</td>' +
@@ -59,7 +59,7 @@
     if (json.mode && json.mode === 'new') {
       markup += '<input type="button" value="Save" id="nemoUI_saveNewView"/>';
     } else {
-      markup += '<p><input type="button" data-viewname="'+ viewName +'" data-method="GET" value="New Locator" id="nemoUI_locatorNew"/></p>';
+      markup += '<p><input type="button" data-viewname="' + viewName + '" data-method="GET" value="New Locator" id="nemoUI_locatorNew"/></p>';
     }
     return markup;
   };
@@ -75,9 +75,9 @@
       markup += '<h3><a href="' + baseurl + '/views">Views</a> > <a href="' + baseurl + '/view/' + json.viewName + '">' + json.viewName + '</a> > ' + locatorName + '</h3>';
     }
 
-     markup += '<p>Type: <input type="text" value="' + locatorType + '" id="nemoUI_locatorType"/></p>' +
-      '<p>Locator: <input type="text" value="' + locatorString + '" id="nemoUI_locatorString"/></p>' +
-      '<p><input type="button" value="Test" id="nemoUI_locatorTest"/><input data-viewname="' + json.viewName + '" data-locatorname="' + locatorName + '" type="button" value="Save" id="nemoUI_locatorSave"/></p>';
+    markup += '<p>Type: <input type="text" value="' + locatorType + '" id="nemoUI_locatorType"/></p>' +
+    '<p>Locator: <input type="text" value="' + locatorString + '" id="nemoUI_locatorString"/></p>' +
+    '<p><input type="button" value="Test" id="nemoUI_locatorTest"/><input data-viewname="' + json.viewName + '" data-locatorname="' + locatorName + '" type="button" value="Save" id="nemoUI_locatorSave"/></p>';
 
     return markup;
   };
@@ -88,11 +88,11 @@
     return markup;
   };
   views.locatorTest = {
-    'render': function(json) {
+    'render': function (json) {
       //add a pre tag in nemoUI
       var prepre = document.querySelector("#nemoUI pre");
       if (prepre && prepre.remove) {
-         prepre.remove();
+        prepre.remove();
       }
       var pre = document.createElement("pre");
       pre.innerText = json.html;//.replace(/</g, "%lt;");
@@ -100,7 +100,7 @@
     }
   };
   views.error = {
-    'render': function(json) {
+    'render': function (json) {
       var errorbox = document.querySelector("#nemoUI .error");
       if (errorbox && errorbox.remove) {
         errorbox.remove();
@@ -110,7 +110,7 @@
       errorbox.innerText = json.uiMsg;
       document.querySelector("#nemoUI").insertBefore(errorbox, document.querySelector("#nemoUI h3").nextSibling);
     },
-    'teardown': function() {
+    'teardown': function () {
       var errorbox = document.querySelector("#nemoUI .error");
       if (errorbox && errorbox.remove) {
         errorbox.remove();
@@ -131,6 +131,7 @@
   div.innerHTML = views.home();
   //'<textarea rows="4" cols="40"></textarea>';
   document.querySelector("body").appendChild(div);
+  console.log('window.frames', window.frames);
   document.querySelector("#nemoUI").addEventListener("click", function (e) {
     if (e.srcElement.tagName === 'A') {
       e.preventDefault();
@@ -154,7 +155,9 @@
     var buttonId = e.srcElement.getAttribute('id');
     var method = e.srcElement.getAttribute('data-method') || 'POST';
     var url = baseurl;
-    if (buttonId === 'nemoUI_newView') {
+    if (buttonId === 'moveMe') {
+      //going to try moving iframe around
+    } else if (buttonId === 'nemoUI_newView') {
       url += '/views/new';
     }
     else if (buttonId === 'nemoUI_locatorNew') {
@@ -194,13 +197,14 @@
     } else {
       return; //don't submit
     }
-    xhr({
-      'method': method,
-      'url': url,
-      'load': xhrLoad,
-      'data': data
-    });
   }
+
+  xhr({
+    'method': method,
+    'url': url,
+    'load': xhrLoad,
+    'data': data
+  });
 
   function xhr(config) {
     //kill any error messages
@@ -212,7 +216,7 @@
     oReq.addEventListener("abort", config.abort || xhrAbort, false);
     oReq.open(config.method || "get", config.url, true);
     if (config.data && config.data !== null) {
-      oReq.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      oReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     }
     oReq.send(config.data);
   }

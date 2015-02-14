@@ -1,10 +1,27 @@
-#nemoUI {
+body {
+    font-family: 'Open Sans',sans-serif;
+    font-size:12px;
     background-color:yellow;
-    position:absolute;
-    min-width:400px;
-    min-height:400px;
-    top:0;
-    right:0;
+    margin:0!important;
+    padding:0!important;
+    width:100%;
+    height:100%;
+}
+div.title {
+    background:black;
+    color:yellow;
+    height:30px;
+    margin:0;
+    padding:0;
+}
+div.title h1 {
+  font-size:14px;
+    margin:0;
+    padding:6px;
+}
+#nemoUI {
+
+    padding:5px;
 }
 
 #nemoUI table td {
@@ -19,4 +36,13 @@
     float:right;
     width: 250px;
     margin-right:50px;
+}
+
+#nemoUI pre {
+    width: 90%;
+    margin:auto;
+    padding:15px;
+    background: #ffffaa;
+    border: 1px solid #c77405;
+    overflow:auto;
 }

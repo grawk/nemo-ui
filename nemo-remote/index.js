@@ -18,23 +18,15 @@ NemoRemote.prototype.start = function (config) {
 
 NemoRemote.prototype.injectUI = function () {
   return this.nemo.driver.executeScript(function () {
-    var scr = document.createElement("script");
-    var link = document.createElement("link");
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.media = 'screen';
-    link.href = 'http://localhost:2330/remote.css';
+    var iframe = document.createElement("iframe");
 
-    scr.setAttribute("src", "http://localhost:2330/remote.js");
-    scr.setAttribute("data-baseurl", "http://localhost:2330");
-    scr.setAttribute("id", "nemo-ui-script");
-    document.querySelector("head").appendChild(scr);
-    document.querySelector("head").appendChild(link);
+    iframe.setAttribute("src", "http://localhost:2330/remote.html");
+    iframe.setAttribute("style", "position: absolute; top:0; right: 0; width: 400px; height: 400px; border: 1px solid black");
+    document.querySelector("body").appendChild(iframe);
   }, function (err) {
     console.log('injectUI err', err);
   });
 };
-
 NemoRemote.prototype.reinjectUI = function () {
   var self = this;
   return this.nemo.driver.executeScript(function () {
