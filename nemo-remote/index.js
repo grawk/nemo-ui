@@ -21,6 +21,7 @@ NemoRemote.prototype.injectUI = function () {
     var iframe = document.createElement("iframe");
 
     iframe.setAttribute("src", "http://localhost:2330/remote.html");
+    iframe.setAttribute('id', 'nemoUI_iframe');
     iframe.setAttribute("style", "position: absolute; top:0; right: 0; width: 400px; height: 400px; border: 1px solid black");
     document.querySelector("body").appendChild(iframe);
   }, function (err) {
@@ -30,7 +31,7 @@ NemoRemote.prototype.injectUI = function () {
 NemoRemote.prototype.reinjectUI = function () {
   var self = this;
   return this.nemo.driver.executeScript(function () {
-    var present = document.querySelector("#nemo-ui-script");
+    var present = document.querySelector("#nemoUI_iframe");
     if (present === null) {
       return false;
     } else {
