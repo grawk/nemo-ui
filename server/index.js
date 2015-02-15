@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var nemoRemote = require(path.resolve(__dirname, '../nemo-remote'));
-var glob = require('glob');
+var util = require(path.resolve(__dirname, '../util'));
 var fs = require('fs');
 var tmpView = null;
 var suitePath = null;
@@ -36,7 +36,7 @@ app.get('/', function (req, res) {
 app.get('/views', function (req, res) {
   console.log('locator path', suitePath + "/locator/*");
   //read JSON files in directory
-  getViews(function(files) {
+  util.getViews(suitePath, function(files) {
     res.json({
       "uiView": "viewList",
       "views": files
@@ -59,12 +59,27 @@ app.post('/views/new', function (req, res) {
   var viewName = req.body.name;
   //save new JSON file
   fs.writeFile(suitePath+'/locator/'+viewName+'.json', '{}', function (err) {
-    if (err) throw err;
+    if (err) {
+      res.json({
+        'uiView': 'error',
+        'uiMsg': 'error message:'  + err.message
+      });
+      return;
+    }
     console.log('Saved ' + viewName + '.json');
-    res.json({
-      'uiView': 'viewEdit',
-      'uiMsg': 'Added View ' + viewName,
-      'viewName': viewName
+    util.syncNemoConfig(suitePath, function (err, ok) {
+      if (err) {
+        res.json({
+          'uiView': 'error',
+          'uiMsg': 'error message:'  + err.message
+        });
+        return;
+      }
+      res.json({
+        'uiView': 'viewEdit',
+        'uiMsg': 'Added View ' + viewName,
+        'viewName': viewName
+      });
     });
   });
 
@@ -85,14 +100,28 @@ app.get('/view/:name/delete', function (req, res) {
   var viewName = req.params.name;
   fs.unlink(suitePath+'/locator/'+viewName+'.json', function(err) {
     if (err) {
-      throw err;
-    }
-    getViews(function(files) {
       res.json({
-        'uiMsg': 'Deleted View ' + viewName,
-        'uiView': 'viewList',
-        'views': files
+        'uiView': 'error',
+        'uiMsg': 'error message:'  + err.message
       });
+      return;
+    }
+    util.getViews(suitePath, function(files) {
+      util.syncNemoConfig(suitePath, function (err, ok) {
+        if (err) {
+          res.json({
+            'uiView': 'error',
+            'uiMsg': 'error message:'  + err.message
+          });
+          return;
+        }
+        res.json({
+          'uiMsg': 'Deleted View ' + viewName,
+          'uiView': 'viewList',
+          'views': files
+        });
+      });
+
     });
   });
 });
@@ -132,8 +161,14 @@ app.post('/view/:name/:locator/edit', function (req, res) {
     'type': locatorType,
     'locator': locatorString
   };
-  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.toString(viewJson), function (err) {
-    if (err) throw err;
+  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.stringify(viewJson, null, 2), function (err) {
+    if (err) {
+      res.json({
+        'uiView': 'error',
+        'uiMsg': 'error message:'  + err.message
+      });
+      return;
+    }
     console.log('Saved ' + viewName + '.json');
     res.json({
       'uiView': 'viewEdit',
@@ -163,8 +198,14 @@ app.post('/view/:name/locator/new', function (req, res) {
     'type': locatorType,
     'locator': locatorString
   };
-  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.toString(viewJson), function (err) {
-    if (err) throw err;
+  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.stringify(viewJson, null, 2), function (err) {
+    if (err) {
+      res.json({
+        'uiView': 'error',
+        'uiMsg': 'error message:'  + err.message
+      });
+      return;
+    }
     console.log('Saved ' + viewName + '.json');
     res.json({
       'uiMsg': 'Added Locator ' + locatorName,
@@ -223,6 +264,7 @@ app.get('/reinject', function (req, res) {
     res.send('OK');
   });
 });
+
 module.exports = function (_suitePath) {
   suitePath = _suitePath;
   var server = app.listen(2330, function () {
@@ -234,13 +276,3 @@ module.exports = function (_suitePath) {
 
   });
 };
-
-function getViews(cb) {
-  glob(suitePath + "/locator/*", function (er, files) {
-    files.forEach(function(file, index, arr) {
-      arr[index] = file.split(suitePath + "/locator/")[1].split(".json")[0];
-    });
-    console.log('views are', files);
-    cb(files);
-  });
-}

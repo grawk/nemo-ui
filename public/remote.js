@@ -197,14 +197,15 @@
     } else {
       return; //don't submit
     }
-  }
 
-  xhr({
-    'method': method,
-    'url': url,
-    'load': xhrLoad,
-    'data': data
-  });
+
+    xhr({
+      'method': method || 'POST',
+      'url': url,
+      'load': xhrLoad,
+      'data': data
+    });
+  }
 
   function xhr(config) {
     //kill any error messages
