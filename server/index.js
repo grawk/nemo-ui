@@ -257,26 +257,50 @@ app.get('/walk/step', function (req, res) {
    console.log('/walk/step');
   if (walkers === null) {
     //create the array of WebElements
-    nemoRemote.injectWalkerStyle().then(function() {
-      return nemoRemote.nemo.drivex.finds({'type': 'css', 'locator': 'input[type=text], input[type=password], input[type=button], select, a'});
+    nemoRemote.injectWalkerStyle().then(function () {
+      return nemoRemote.nemo.drivex.finds({
+        'type': 'css',
+        'locator': 'input[type=text], input[type=password], input[type=button], select, a'
+      });
     }).
-    then(function(_walkers) {
-        console.log('walkers', _walkers.length);
+      then(function (_allwalkers) {
+        console.log('_allwalkers', _allwalkers.length);
         //filter out non visible elements
-
-       //walkers = _walkers;
-       // setWalker();
+        nemoRemote.nemo.wd.promise.filter(_allwalkers, function (_current) {
+          return _current.isDisplayed();
+        }).then(function (_viswalkers) {
+          console.log('_viswalkers', _viswalkers.length);
+          walkers = _viswalkers;
+          setWalker().then(function() {
+            res.json({
+              'uiView': 'error',
+              'uiMsg': 'set first walker'
+            });
+          });
+        });
+        //walkers = _walkers;
+        // setWalker();
+      });
+  } else {
+    setWalker().then(function() {
+      res.json({
+        'uiView': 'error',
+        'uiMsg': 'set walker'
+      });
     });
+  }
     function setWalker() {
       var currentWalker = walkers.shift();
       walkers.push(currentWalker);
       console.log('currentWalker', currentWalker);
-      nemoRemote.nemo.driver.executeScript(function() {
-        console.log('arguments[0]', arguments);
+      return nemoRemote.nemo.driver.executeScript(function() {
+        if (document.querySelector('.__nemo__walker__')) {
+          document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
+        }
         arguments[0].className += ' __nemo__walker__';
       }, currentWalker);
     }
-  }
+
 
 });
 app.get('/walk/stop', function (req, res) {
