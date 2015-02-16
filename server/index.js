@@ -6,6 +6,8 @@ var util = require(path.resolve(__dirname, '../util'));
 var fs = require('fs');
 var tmpView = null;
 var suitePath = null;
+var walkers = null;
+
 var bodyParser = require('body-parser');
 
 var options = {
@@ -132,15 +134,7 @@ app.get('/view/:name/:locator/edit', function (req, res) {
   var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
-  //tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
-  //viewMethods = [];
-  //Object.keys(tmpView).forEach(function(val, ind, arr) {
-  //  console.log('val', val, 'constructor', val.constructor);
-  //  if (val.indexOf(locatorName) === 0) {
-  //    console.log('push');
-  //    viewMethods.push(val);
-  //  }
-  //});
+
     res.json({
       'uiView': 'locatorEdit',
       'viewName': viewName,
@@ -258,6 +252,35 @@ app.all('/view/:name/:locator/test', function (req, res) {
       'uiMsg': 'error message:'  + err.message
     })
   });
+});
+app.get('/walk/step', function (req, res) {
+   console.log('/walk/step');
+  if (walkers === null) {
+    //create the array of WebElements
+    nemoRemote.injectWalkerStyle().then(function() {
+      return nemoRemote.nemo.drivex.finds({'type': 'css', 'locator': 'input[type=text], input[type=password], input[type=button], select, a'});
+    }).
+    then(function(_walkers) {
+        console.log('walkers', _walkers.length);
+        //filter out non visible elements
+
+       //walkers = _walkers;
+       // setWalker();
+    });
+    function setWalker() {
+      var currentWalker = walkers.shift();
+      walkers.push(currentWalker);
+      console.log('currentWalker', currentWalker);
+      nemoRemote.nemo.driver.executeScript(function() {
+        console.log('arguments[0]', arguments);
+        arguments[0].className += ' __nemo__walker__';
+      }, currentWalker);
+    }
+  }
+
+});
+app.get('/walk/stop', function (req, res) {
+
 });
 app.get('/reinject', function (req, res) {
   nemoRemote.reinjectUI().then(function () {

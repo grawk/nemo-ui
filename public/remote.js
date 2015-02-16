@@ -77,7 +77,9 @@
 
     markup += '<p>Type: <input type="text" value="' + locatorType + '" id="nemoUI_locatorType"/></p>' +
     '<p>Locator: <input type="text" value="' + locatorString + '" id="nemoUI_locatorString"/></p>' +
-    '<p><input type="button" value="Test" id="nemoUI_locatorTest"/><input data-viewname="' + json.viewName + '" data-locatorname="' + locatorName + '" type="button" value="Save" id="nemoUI_locatorSave"/></p>';
+    '<p><input type="button" value="Test" id="nemoUI_locatorTest"/><input data-viewname="' + json.viewName + '" data-locatorname="' + locatorName + '" type="button" value="Save" id="nemoUI_locatorSave"/>';
+
+    markup += '<input type="button" value="Walk" id="nemoUI_walk"/></p>';
 
     return markup;
   };
@@ -194,6 +196,10 @@
       var viewName = e.srcElement.getAttribute('data-viewname') || 'foo';
       url += '/view/' + viewName + '/bar/test';
       data = 'type=' + type + '&string=' + string;
+    }
+    else if (buttonId === 'nemoUI_walk') {
+      url += '/walk/step';
+      method = 'GET';
     } else {
       return; //don't submit
     }
@@ -206,7 +212,6 @@
       'data': data
     });
   }
-
   function xhr(config) {
     //kill any error messages
     views.error.teardown();

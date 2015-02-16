@@ -28,6 +28,20 @@ NemoRemote.prototype.injectUI = function () {
     console.log('injectUI err', err);
   });
 };
+NemoRemote.prototype.injectWalkerStyle = function () {
+  return this.nemo.driver.executeScript(function () {
+    if (document.querySelector('#__nemo__walker__stylesheet')) {
+      return;
+    }
+    var walkerStyle = document.createElement("style");
+    walkerStyle.setAttribute('id', '__nemo__walker__stylesheet');
+    walkerStyle.innerText = '.__nemo__walker__ {border:2px solid red}';
+
+    document.querySelector("head").appendChild(walkerStyle);
+  }, function (err) {
+    console.log('injectWalkerStyle err', err);
+  });
+};
 NemoRemote.prototype.reinjectUI = function () {
   var self = this;
   return this.nemo.driver.executeScript(function () {
