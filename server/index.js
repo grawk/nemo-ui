@@ -7,6 +7,7 @@ var fs = require('fs');
 var tmpView = null;
 var suitePath = null;
 var walkers = null;
+var currentWalker = null;
 
 var bodyParser = require('body-parser');
 
@@ -28,7 +29,7 @@ app.use(function (req, res, next) {
   console.log('handling request', req.path);
   return next();
 });
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
@@ -38,7 +39,7 @@ app.get('/', function (req, res) {
 app.get('/views', function (req, res) {
   console.log('locator path', suitePath + "/locator/*");
   //read JSON files in directory
-  util.getViews(suitePath, function(files) {
+  util.getViews(suitePath, function (files) {
     res.json({
       "uiView": "viewList",
       "views": files
@@ -60,11 +61,11 @@ app.post('/views/new', function (req, res) {
   //get view name off of request
   var viewName = req.body.name;
   //save new JSON file
-  fs.writeFile(suitePath+'/locator/'+viewName+'.json', '{}', function (err) {
+  fs.writeFile(suitePath + '/locator/' + viewName + '.json', '{}', function (err) {
     if (err) {
       res.json({
         'uiView': 'error',
-        'uiMsg': 'error message:'  + err.message
+        'uiMsg': 'error message:' + err.message
       });
       return;
     }
@@ -73,7 +74,7 @@ app.post('/views/new', function (req, res) {
       if (err) {
         res.json({
           'uiView': 'error',
-          'uiMsg': 'error message:'  + err.message
+          'uiMsg': 'error message:' + err.message
         });
         return;
       }
@@ -89,7 +90,7 @@ app.post('/views/new', function (req, res) {
 
 app.get('/view/:name', function (req, res) {
   var viewName = req.params.name;
-  var view = require(suitePath+'/locator/'+viewName+'.json');
+  var view = require(suitePath + '/locator/' + viewName + '.json');
   res.json({
     'uiView': 'viewEdit',
     'viewName': viewName,
@@ -100,20 +101,20 @@ app.get('/view/:name', function (req, res) {
 
 app.get('/view/:name/delete', function (req, res) {
   var viewName = req.params.name;
-  fs.unlink(suitePath+'/locator/'+viewName+'.json', function(err) {
+  fs.unlink(suitePath + '/locator/' + viewName + '.json', function (err) {
     if (err) {
       res.json({
         'uiView': 'error',
-        'uiMsg': 'error message:'  + err.message
+        'uiMsg': 'error message:' + err.message
       });
       return;
     }
-    util.getViews(suitePath, function(files) {
+    util.getViews(suitePath, function (files) {
       util.syncNemoConfig(suitePath, function (err, ok) {
         if (err) {
           res.json({
             'uiView': 'error',
-            'uiMsg': 'error message:'  + err.message
+            'uiMsg': 'error message:' + err.message
           });
           return;
         }
@@ -131,18 +132,18 @@ app.get('/view/:name/delete', function (req, res) {
 app.get('/view/:name/:locator/edit', function (req, res) {
   var viewName = req.params.name;
   var locatorName = req.params.locator;
-  var locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+  var locatorJson = require(suitePath + '/locator/' + viewName + '.json')[locatorName];
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
 
-    res.json({
-      'uiView': 'locatorEdit',
-      'viewName': viewName,
-      'locatorName': locatorName,
-      'locatorJson': locatorJson,
-      'locatorType': locatorJson.type,
-      'locatorString': locatorJson.locator
-    });
+  res.json({
+    'uiView': 'locatorEdit',
+    'viewName': viewName,
+    'locatorName': locatorName,
+    'locatorJson': locatorJson,
+    'locatorType': locatorJson.type,
+    'locatorString': locatorJson.locator
+  });
 });
 
 app.post('/view/:name/:locator/edit', function (req, res) {
@@ -150,16 +151,16 @@ app.post('/view/:name/:locator/edit', function (req, res) {
   var locatorName = req.params.locator;
   var locatorType = req.body.type;
   var locatorString = req.body.string;
-  var viewJson = require(suitePath+'/locator/'+viewName+'.json');
+  var viewJson = require(suitePath + '/locator/' + viewName + '.json');
   viewJson[locatorName] = {
     'type': locatorType,
     'locator': locatorString
   };
-  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.stringify(viewJson, null, 2), function (err) {
+  fs.writeFile(suitePath + '/locator/' + viewName + '.json', JSON.stringify(viewJson, null, 2), function (err) {
     if (err) {
       res.json({
         'uiView': 'error',
-        'uiMsg': 'error message:'  + err.message
+        'uiMsg': 'error message:' + err.message
       });
       return;
     }
@@ -187,16 +188,16 @@ app.post('/view/:name/locator/new', function (req, res) {
   var locatorName = req.body.name;
   var locatorType = req.body.type;
   var locatorString = req.body.string;
-  var viewJson = require(suitePath+'/locator/'+viewName+'.json');
+  var viewJson = require(suitePath + '/locator/' + viewName + '.json');
   viewJson[locatorName] = {
     'type': locatorType,
     'locator': locatorString
   };
-  fs.writeFile(suitePath+'/locator/'+viewName+'.json', JSON.stringify(viewJson, null, 2), function (err) {
+  fs.writeFile(suitePath + '/locator/' + viewName + '.json', JSON.stringify(viewJson, null, 2), function (err) {
     if (err) {
       res.json({
         'uiView': 'error',
-        'uiMsg': 'error message:'  + err.message
+        'uiMsg': 'error message:' + err.message
       });
       return;
     }
@@ -214,7 +215,7 @@ app.post('/view/:name/locator/new', function (req, res) {
 app.get('/view/:name/:locator/delete', function (req, res) {
   var viewName = req.params.name;
   var locatorName = req.params.locator;
-  var view = require(suitePath+'/locator/'+viewName+'.json');
+  var view = require(suitePath + '/locator/' + viewName + '.json');
   res.json({
     'uiMsg': 'Deleted Locator ' + locatorName,
     'uiView': 'viewEdit',
@@ -233,28 +234,28 @@ app.all('/view/:name/:locator/test', function (req, res) {
       'locator': req.body.string
     }
   } else {
-    locatorJson = require(suitePath+'/locator/'+viewName+'.json')[locatorName];
+    locatorJson = require(suitePath + '/locator/' + viewName + '.json')[locatorName];
   }
 
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
   tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
-  tmpView[locatorName]().getOuterHtml().then(function(outerHtml) {
+  tmpView[locatorName]().getOuterHtml().then(function (outerHtml) {
     res.json({
       'uiView': 'locatorTest',
       'viewName': viewName,
       'html': outerHtml
     });
-  }, function(err) {
+  }, function (err) {
     console.log('err from webdriver', err);
     res.json({
       'uiView': 'error',
-      'uiMsg': 'error message:'  + err.message
+      'uiMsg': 'error message:' + err.message
     })
   });
 });
 app.get('/walk/step', function (req, res) {
-   console.log('/walk/step');
+  console.log('/walk/step');
   if (walkers === null) {
     //create the array of WebElements
     nemoRemote.injectWalkerStyle().then(function () {
@@ -271,35 +272,92 @@ app.get('/walk/step', function (req, res) {
         }).then(function (_viswalkers) {
           console.log('_viswalkers', _viswalkers.length);
           walkers = _viswalkers;
-          setWalker().then(function() {
-            res.json({
-              'uiView': 'error',
-              'uiMsg': 'set first walker'
+          setWalker().
+            then(function () {
+              return getWalkerProps();
+            }).
+            then(function (walkerProps) {
+              var walkerLocator = buildWalkerLocator(walkerProps);
+              res.json({
+                'uiView': 'locatorWalk',
+                'locator': walkerLocator.locator,
+                'type': walkerLocator.type,
+                'html': walkerProps.outerHtml
+              });
             });
-          });
         });
         //walkers = _walkers;
         // setWalker();
       });
   } else {
-    setWalker().then(function() {
-      res.json({
-        'uiView': 'error',
-        'uiMsg': 'set walker'
+    setWalker().
+      then(function () {
+        return getWalkerProps();
+      }).
+      then(function (walkerProps) {
+        var walkerLocator = buildWalkerLocator(walkerProps);
+        res.json({
+          'uiView': 'locatorWalk',
+          'locator': walkerLocator.locator,
+          'type': walkerLocator.type,
+          'html': walkerProps.outerHtml
+        });
       });
-    });
   }
-    function setWalker() {
-      var currentWalker = walkers.shift();
-      walkers.push(currentWalker);
-      console.log('currentWalker', currentWalker);
-      return nemoRemote.nemo.driver.executeScript(function() {
-        if (document.querySelector('.__nemo__walker__')) {
-          document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
-        }
-        arguments[0].className += ' __nemo__walker__';
-      }, currentWalker);
+  function setWalker() {
+    currentWalker = walkers.shift();
+    walkers.push(currentWalker);
+    console.log('currentWalker', currentWalker);
+    return nemoRemote.nemo.driver.executeScript(function () {
+      if (document.querySelector('.__nemo__walker__')) {
+        document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
+      }
+      arguments[0].className += ' __nemo__walker__';
+    }, currentWalker);
+  }
+
+  function getWalkerProps() {
+    var tagName = null;
+    var id = null;
+    var className = null;
+    var name = null;
+    var outerHtml = null;
+    return currentWalker.getTagName().
+      then(function (_tagName) {
+        tagName = _tagName;
+        return currentWalker.getAttribute('id');
+      }).then(function (_id) {
+        id = _id;
+        return currentWalker.getOuterHtml();
+      }).then(function (_outerHtml) {
+        outerHtml = _outerHtml;
+        return currentWalker.getAttribute('class');
+      }).then(function (_className) {
+        className = _className;
+        return currentWalker.getAttribute('name');
+      }).then(function (_name) {
+        name = _name;
+        return {
+          'tagName': tagName,
+          'id': id,
+          'className': className,
+          'name': name,
+          'outerHtml': outerHtml
+        };
+      });
+  }
+
+  function buildWalkerLocator(walkerProps) {
+    var walkerLocator = {'type': null, 'locator': null};
+    if (walkerProps.id !== null) {
+      walkerLocator.type = 'css';
+      walkerLocator.locator = '#' + walkerProps.id;
+    } else if (walkerProps.tagName !== null && walkerProps.name !== null) {
+      walkerLocator.type = 'css';
+      walkerLocator.locator = walkerProps.tagName + '[name=' + walkerProps.name + ']';
     }
+    return walkerLocator;
+  }
 
 
 });

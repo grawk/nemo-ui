@@ -92,15 +92,29 @@
   views.locatorTest = {
     'render': function (json) {
       //add a pre tag in nemoUI
+      views.pre.render(json.html);
+    }
+  };
+  views.locatorWalk = {
+    'render': function (json) {
+      //add a pre tag in nemoUI
+      views.pre.render(json.html);
+      document.querySelector('#nemoUI_locatorType').value = json.type;
+      document.querySelector('#nemoUI_locatorString').value = json.locator;
+
+    }
+  };
+  views.pre = {
+    'render': function(html) {
       var prepre = document.querySelector("#nemoUI pre");
       if (prepre && prepre.remove) {
         prepre.remove();
       }
       var pre = document.createElement("pre");
-      pre.innerText = json.html;//.replace(/</g, "%lt;");
+      pre.innerText = html;//.replace(/</g, "%lt;");
       document.querySelector("#nemoUI").appendChild(pre);
     }
-  };
+  }
   views.error = {
     'render': function (json) {
       var errorbox = document.querySelector("#nemoUI .error");
