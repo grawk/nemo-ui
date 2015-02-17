@@ -20,25 +20,36 @@ div.title h1 {
     padding:6px;
 }
 #nemoUI {
-
     padding:5px;
 }
 
-#nemoUI table td {
+table td {
     border:1px solid #ccc;
     padding:3px;
 }
-#nemoUI div.uimsg {
-    color:blue;
+.messagebox {
+    border: 1px solid black;
+    margin:8px;
+    padding:8px;
+    text-align:left;
+    background-color:#ffffff;
 }
 
-#nemoUI p input[type=text] {
+.messagebox.error {
+    border-color:red;
+    color:red;
+}
+.messagebox.info {
+    border-color:blue;
+    color:blue;
+}
+p input[type=text] {
     float:right;
     width: 250px;
     margin-right:50px;
 }
 
-#nemoUI pre {
+pre {
     width: 90%;
     margin:auto;
     padding:15px;
