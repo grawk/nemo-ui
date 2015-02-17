@@ -208,12 +208,21 @@ app.post('/view/:name/locator/new', function (req, res) {
 app.get('/view/:name/:locator/delete', function (req, res) {
   var viewName = req.params.name;
   var locatorName = req.params.locator;
-  var view = require(suitePath + '/locator/' + viewName + '.json');
-  res.json({
-    'uiMsg': {type: 'info', message: 'Deleted Locator ' + locatorName},
-    'uiView': 'viewEdit',
-    'viewName': viewName,
-    'viewJSON': view
+  var viewJson = require(suitePath + '/locator/' + viewName + '.json');
+  if (viewJson[locatorName]) {
+    delete viewJson[locatorName];
+  }
+  fs.writeFile(suitePath + '/locator/' + viewName + '.json', JSON.stringify(viewJson, null, 2), function (err) {
+    if (err) {
+      errorResponse(err, res);
+      return;
+    }
+    res.json({
+      'uiMsg': {type: 'info', message: 'Deleted Locator ' + locatorName},
+      'uiView': 'viewEdit',
+      'viewName': viewName,
+      'viewJSON': view
+    });
   });
 });
 
@@ -343,7 +352,20 @@ app.get('/walk/step', function (req, res) {
 
 });
 app.get('/walk/stop', function (req, res) {
-
+  walkers = null;
+  nemoRemote.nemo.driver.executeScript(function () {
+    if (document.querySelector('.__nemo__walker__')) {
+      document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
+    }
+  }).then(function() {
+     res.json({
+       'uiView': 'stopWalk',
+       'uiMsg': {
+         type: 'info',
+         message: 'Walk canceled'
+       }
+     })
+  });
 });
 app.get('/reinject', function (req, res) {
   nemoRemote.reinjectUI().then(function () {

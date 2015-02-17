@@ -103,6 +103,16 @@ var __nemoTemplates = function(baseurl) {
       document.querySelector('#nemoUI_cancelWalk').setAttribute('style', 'display:default');
     }
   };
+  views.stopWalk = {
+    'render': function (json) {
+      //add a pre tag in nemoUI
+      views.pre.teardown();
+      document.querySelector('#nemoUI_locatorType').value = '';
+      document.querySelector('#nemoUI_locatorString').value = '';
+      document.querySelector('#nemoUI_locatorSave').setAttribute('data-walk', false);
+      document.querySelector('#nemoUI_cancelWalk').setAttribute('style', 'display:none');
+    }
+  };
   views.pre = {
     'render': function(html) {
       var prepre = document.querySelector("#nemoUI pre");
@@ -112,6 +122,12 @@ var __nemoTemplates = function(baseurl) {
       var pre = document.createElement("pre");
       pre.innerText = html;//.replace(/</g, "%lt;");
       document.querySelector("#nemoUI").appendChild(pre);
+    },
+    'teardown': function() {
+      var prepre = document.querySelector("#nemoUI pre");
+      if (prepre && prepre.remove) {
+        prepre.remove();
+      }
     }
   }
   views.message = {
