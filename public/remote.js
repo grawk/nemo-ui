@@ -56,8 +56,10 @@
       if (locatorName === '') {
         //new locator
         var name = document.querySelector('#nemoUI_newName').value;
+        viewName = document.querySelector('#nemoUI_viewSelect').value;
         url += '/view/' + viewName + '/locator/new';
         data = 'name=' + name + '&type=' + type + '&string=' + string;
+
         if (walking === 'true') {
           data += '&walk=true';
         }

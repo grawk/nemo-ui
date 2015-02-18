@@ -125,14 +125,16 @@ app.get('/view/:name/:locator/edit', function (req, res) {
   var locatorJson = require(suitePath + '/locator/' + viewName + '.json')[locatorName];
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
-
-  res.json({
-    'uiView': 'locatorEdit',
-    'viewName': viewName,
-    'locatorName': locatorName,
-    'locatorJson': locatorJson,
-    'locatorType': locatorJson.type,
-    'locatorString': locatorJson.locator
+  util.getViews(suitePath, function (views) {
+    res.json({
+      'uiView': 'locatorEdit',
+      'viewName': viewName,
+      'locatorName': locatorName,
+      'locatorJson': locatorJson,
+      'locatorType': locatorJson.type,
+      'locatorString': locatorJson.locator,
+      'views': views
+    });
   });
 });
 
@@ -163,10 +165,13 @@ app.post('/view/:name/:locator/edit', function (req, res) {
 });
 app.get('/view/:name/locator/new', function (req, res) {
   var viewName = req.params.name;
-  res.json({
-    'uiView': 'locatorEdit',
-    'mode': {'new': true},
-    'viewName': viewName
+  util.getViews(suitePath, function (views) {
+    res.json({
+      'uiView': 'locatorEdit',
+      'mode': {'new': true},
+      'viewName': viewName,
+      'views': views
+    });
   });
 });
 

@@ -61,16 +61,32 @@ var __nemoTemplates = function(baseurl) {
     }
     return markup;
   };
+  views.viewSelect = {
+    'render': function(json) {
+      var markup = '';
+      if (json.mode && json.mode.new) {
+        markup += '<select id="nemoUI_viewSelect">';
+        json.views.forEach(function(view) {
+          var selected = (json.viewName === view) ? 'selected' : '';
+          markup += '<option value="' + view + '" ' + selected + '>' + view + '</option>';
+        });
+        markup += '</select>';
+        return markup;
+      } else {
+        return '<a href="' + baseurl + '/view/' + json.viewName + '">' + json.viewName + '</a>';
+      }
 
+    }
+  };
   views.locatorEdit = function (json) {
     var locatorString = json.locatorString || '';
     var locatorType = json.locatorType || '';
     var locatorName = json.locatorName || '';
     var markup = '';
     if (json.mode && json.mode.new) {
-      markup += '<h3><a href="' + baseurl + '/views">Views</a> > <a href="' + baseurl + '/view/' + json.viewName + '">' + json.viewName + '</a> > <input type="text" value="" id="nemoUI_newName"/></h3>';
+      markup += '<h3><a href="' + baseurl + '/views">Views</a> > ' + views.viewSelect.render(json) + ' > <input type="text" value="" id="nemoUI_newName"/></h3>';
     } else {
-      markup += '<h3><a href="' + baseurl + '/views">Views</a> > <a href="' + baseurl + '/view/' + json.viewName + '">' + json.viewName + '</a> > ' + locatorName + '</h3>';
+      markup += '<h3><a href="' + baseurl + '/views">Views</a> > ' + views.viewSelect.render(json) + ' > ' + locatorName + '</h3>';
     }
 
     markup += '<p>Type: <input type="text" value="' + locatorType + '" id="nemoUI_locatorType"/></p>' +
