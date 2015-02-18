@@ -97,6 +97,7 @@ var __nemoTemplates = function(baseurl) {
     'render': function (json) {
       //add a pre tag in nemoUI
       views.pre.render(json.html);
+      document.querySelector('#nemoUI_newName').value = '';
       document.querySelector('#nemoUI_locatorType').value = json.type;
       document.querySelector('#nemoUI_locatorString').value = json.locator;
       document.querySelector('#nemoUI_locatorSave').setAttribute('data-walk', true);

@@ -198,7 +198,13 @@ app.post('/view/:name/locator/new', function (req, res) {
       //remove the one we just added
       flashMessage = 'Added Locator ' + locatorName;
       walkers.pop();
-      res.redirect('/walk/step');
+      if (walkers.length && walkers.length > 0) {
+        res.redirect('/walk/step');
+      }
+      else {
+        flashMessage = 'Added Locator ' + locatorName + ' and finished walking';
+        res.redirect('/walk/stop');
+      }
     }
 
   });
@@ -276,6 +282,8 @@ app.get('/walk/step', function (req, res) {
           walkers = _viswalkers;
           setWalker();
         });
+      }, function(err) {
+        errorResponse(err, res);
       });
   } else {
     setWalker();
@@ -303,6 +311,8 @@ app.get('/walk/step', function (req, res) {
           jsonResponse.uiMsg = {type: 'info', message: _flashMessage};
         }
         res.json(jsonResponse);
+      }, function(err) {
+        errorResponse(err, res);
       });
   }
 
@@ -334,6 +344,8 @@ app.get('/walk/step', function (req, res) {
           'name': name,
           'outerHtml': outerHtml
         };
+      }, function(err) {
+        errorResponse(err, res);
       });
   }
 
@@ -352,14 +364,15 @@ app.get('/walk/step', function (req, res) {
 
 });
 app.get('/walk/stop', removeWalkStyle, function (req, res) {
-
-     res.json({
-       'uiView': 'stopWalk',
-       'uiMsg': {
-         type: 'info',
-         message: 'Walk canceled'
-       }
-     })
+  var message = flashMessage || 'Walk canceled';
+  flashMessage = null;
+  res.json({
+    'uiView': 'stopWalk',
+    'uiMsg': {
+      type: 'info',
+      message: message
+    }
+  })
 
 });
 
@@ -383,9 +396,9 @@ function removeWalkStyle(req, res, next) {
     if (document.querySelector('.__nemo__walker__')) {
       document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
     }
-  }).then(function() {
+  }).then(function () {
     next();
-  }, function(err) {
+  }, function (err) {
     errorResponse(err, res);
     return;
   })
