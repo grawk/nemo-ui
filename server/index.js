@@ -38,7 +38,7 @@ app.use(function (req, res, next) {
 app.get('/', function (req, res) {
   res.send('Hello World!')
 });
-app.get('/views', function (req, res) {
+app.get('/views', removeWalkStyle, function (req, res) {
   console.log('locator path', suitePath + "/locator/*");
   //read JSON files in directory
   util.getViews(suitePath, function (files) {
@@ -84,7 +84,7 @@ app.post('/views/new', function (req, res) {
 
 });
 
-app.get('/view/:name', function (req, res) {
+app.get('/view/:name', removeWalkStyle, function (req, res) {
   var viewName = req.params.name;
   var view = require(suitePath + '/locator/' + viewName + '.json');
   res.json({
@@ -221,7 +221,7 @@ app.get('/view/:name/:locator/delete', function (req, res) {
       'uiMsg': {type: 'info', message: 'Deleted Locator ' + locatorName},
       'uiView': 'viewEdit',
       'viewName': viewName,
-      'viewJSON': view
+      'viewJSON': viewJson
     });
   });
 });
@@ -351,13 +351,8 @@ app.get('/walk/step', function (req, res) {
 
 
 });
-app.get('/walk/stop', function (req, res) {
-  walkers = null;
-  nemoRemote.nemo.driver.executeScript(function () {
-    if (document.querySelector('.__nemo__walker__')) {
-      document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
-    }
-  }).then(function() {
+app.get('/walk/stop', removeWalkStyle, function (req, res) {
+
      res.json({
        'uiView': 'stopWalk',
        'uiMsg': {
@@ -365,8 +360,10 @@ app.get('/walk/stop', function (req, res) {
          message: 'Walk canceled'
        }
      })
-  });
+
 });
+
+
 app.get('/reinject', function (req, res) {
   nemoRemote.reinjectUI().then(function () {
     res.send('OK');
@@ -378,6 +375,20 @@ function errorResponse(err, res) {
     'uiView': 'message',
     'uiMsg': {type: 'error', message: 'error message:' + err.message}
   });
+}
+
+function removeWalkStyle(req, res, next) {
+  walkers = null;
+  nemoRemote.nemo.driver.executeScript(function () {
+    if (document.querySelector('.__nemo__walker__')) {
+      document.querySelector('.__nemo__walker__').className = document.querySelector('.__nemo__walker__').className.replace('__nemo__walker__', '');
+    }
+  }).then(function() {
+    next();
+  }, function(err) {
+    errorResponse(err, res);
+    return;
+  })
 }
 module.exports = function (_suitePath) {
   suitePath = _suitePath;

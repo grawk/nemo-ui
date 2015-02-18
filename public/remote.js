@@ -81,6 +81,9 @@
     else if (buttonId === 'nemoUI_walk') {
       url += '/walk/step';
       method = 'GET';
+    } else if (buttonId === 'nemoUI_cancelWalk') {
+      url += '/walk/stop';
+      method = 'GET';
     } else {
       return; //don't submit
     }
