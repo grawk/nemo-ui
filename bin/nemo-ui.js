@@ -21,28 +21,28 @@ var suitePath = program.path;
 console.log('suitePath', suitePath);
 console.log('url %s, browser %s', process.env.BASE_URL, process.env.BROWSER);
 //launch browser
-var config = {
-  plugins: {
-    "drivex": {
-      "module": "nemo-drivex",
-      "register": true
-    },
-    "locatex": {
-      "module": "nemo-locatex",
-      "register": true
-    },
-    "view": {
-      "module": "nemo-view"
-    }
-  },
-  nemoData: {
-    targetBrowser: browser || "chrome",
-    targetServer: "localhost",
-    localServer: true,
-    seleniumJar: "/usr/bin/selenium-server-standalone.jar",
-    targetBaseUrl: url
-  }
-};
+//var config = {
+//  plugins: {
+//    "drivex": {
+//      "module": "nemo-drivex",
+//      "register": true
+//    },
+//    "locatex": {
+//      "module": "nemo-locatex",
+//      "register": true
+//    },
+//    "view": {
+//      "module": "nemo-view"
+//    }
+//  },
+//  nemoData: {
+//    targetBrowser: browser || "chrome",
+//    targetServer: "localhost",
+//    localServer: true,
+//    seleniumJar: "/usr/bin/selenium-server-standalone.jar",
+//    targetBaseUrl: url
+//  }
+//};
 //start express
 serv(suitePath);
 
