@@ -28,10 +28,8 @@
     "commander": "^2.6.0",
     "express": "^4.11.2",
     "glob": "^4.3.5",
-    "nemo": "^0.3.0",
-    "nemo-drivex": "^0.1.0",
-    "nemo-locatex": "^0.1.0",
-    "nemo-view": "^0.3.0"
+    "nemo": "^1.0.0",
+    "nemo-view": "^1.0.0"
   },
   "homepage": "https://github.com/grawk/nemo-ui"
 }

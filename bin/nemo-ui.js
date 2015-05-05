@@ -15,11 +15,11 @@ program
 
 program.parse(process.argv);
 
-var url = program.url;
-var browser = program.browser;
+process.env.BASE_URL = program.url;
+process.env.BROWSER = program.browser;
 var suitePath = program.path;
 console.log('suitePath', suitePath);
-console.log('url %s, browser %s', program.url, program.browser);
+console.log('url %s, browser %s', process.env.BASE_URL, process.env.BROWSER);
 //launch browser
 var config = {
   plugins: {
@@ -47,6 +47,9 @@ var config = {
 serv(suitePath);
 
 //start Nemo
-nemoRemote.start(config).then(function() {
+nemoRemote.start(function _uiInjector(err) {
+  if (err) {
+    throw err;
+  }
   nemoRemote.injectUI();
 });

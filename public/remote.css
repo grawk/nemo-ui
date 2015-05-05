@@ -8,7 +8,7 @@ body {
     height:100%;
 }
 div.title {
-    background:black;
+    background:#00A000;
     color:yellow;
     height:30px;
     margin:0;
@@ -22,10 +22,22 @@ div.title h1 {
 #nemoUI {
     padding:5px;
 }
-
-table td {
-    border:1px solid #ccc;
+table {
+    background-color:#00A000;
+    padding:0;
+    border-spacing: 1px;
+}
+th {
+    background-color:yellow;
     padding:3px;
+    margin:1px;
+}
+table td {
+    border:0;
+    background-color:yellow;
+    padding:3px;
+    margin:1px
+
 }
 .messagebox {
     border: 1px solid black;
