@@ -1,13 +1,14 @@
 'use strict';
 
 var Nemo = require('nemo');
-
+var path = require('path');
 function NemoRemote() {
   this.nemo = {};
 }
 
 NemoRemote.prototype.start = function (cb) {
-  this.nemo = Nemo(function nemoSetup(err) {
+  var nemoBaseDir = __dirname;
+  this.nemo = Nemo(nemoBaseDir, function nemoSetup(err) {
     if (err) {
       return cb(err);
     }
