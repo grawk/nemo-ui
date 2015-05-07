@@ -8,11 +8,13 @@ function NemoRemote() {
 
 NemoRemote.prototype.start = function (cb) {
   var nemoBaseDir = __dirname;
-  this.nemo = Nemo(nemoBaseDir, function nemoSetup(err) {
+  var nemo = this.nemo = Nemo(nemoBaseDir, function nemoSetup(err) {
     if (err) {
       return cb(err);
     }
-    cb(null);
+    nemo.driver.get(nemo.data.baseUrl).then(function () {
+      cb(null);
+    })
   });
   //).setup().then(function (_nemo) {
   //  self.nemo = _nemo;

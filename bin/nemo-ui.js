@@ -47,7 +47,7 @@ console.log('url %s, browser %s', process.env.BASE_URL, process.env.BROWSER);
 serv(suitePath);
 
 //start Nemo
-nemoRemote.start(function _uiInjector(err) {
+nemoRemote.start(function _uiInjector(err, nemo) {
   if (err) {
     throw err;
   }

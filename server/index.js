@@ -69,17 +69,13 @@ app.post('/views/new', function (req, res) {
       return;
     }
     console.log('Saved ' + viewName + '.json');
-    util.syncNemoConfig(suitePath, function (err, ok) {
-      if (err) {
-        errorResponse(err, res);
-        return;
-      }
+
       res.json({
         'uiView': 'viewEdit',
         'uiMsg': {type: 'info', message: 'Added View ' + viewName},
         'viewName': viewName
       });
-    });
+
   });
 
 });
@@ -103,17 +99,12 @@ app.get('/view/:name/delete', function (req, res) {
       return;
     }
     util.getViews(suitePath, function (files) {
-      util.syncNemoConfig(suitePath, function (err, ok) {
-        if (err) {
-          errorResponse(err, res);
-          return;
-        }
+
         res.json({
           'uiMsg': {type: 'info', message: 'Deleted View ' + viewName},
           'uiView': 'viewList',
           'views': files
         });
-      });
 
     });
   });
@@ -252,7 +243,7 @@ app.all('/view/:name/:locator/test', function (req, res) {
 
   var viewJson = {};
   viewJson[locatorName] = locatorJson;
-  tmpView = nemoRemote.nemo.view.addView({'name': 'tmpView', 'locator': viewJson}, false);
+  tmpView = nemoRemote.nemo.view.addView(viewJson, ['tmpView'], false);
   tmpView[locatorName]().getOuterHtml().then(function (outerHtml) {
     res.json({
       'uiView': 'locatorTest',
@@ -274,7 +265,7 @@ app.get('/walk/step', function (req, res) {
   if (walkers === null) {
     //create the array of WebElements
     nemoRemote.injectWalkerStyle().then(function () {
-      return nemoRemote.nemo.drivex.finds({
+      return nemoRemote.nemo.view._finds({
         'type': 'css',
         'locator': 'input[type=text], input[type=password], input[type=button], select, a'
       });
@@ -409,7 +400,7 @@ function removeWalkStyle(req, res, next) {
   })
 }
 module.exports = function (_suitePath) {
-  suitePath = _suitePath;
+  suitePath = path.resolve(process.cwd(), _suitePath);
   var server = app.listen(2330, function () {
 
     var host = server.address().address;
