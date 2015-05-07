@@ -1,6 +1,6 @@
 {
   "name": "nemo-ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "UI for Nemo View creation",
   "main": "index.js",
   "scripts": {
